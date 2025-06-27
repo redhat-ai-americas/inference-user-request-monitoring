@@ -1,0 +1,39 @@
+---
+apiVersion: ocs.openshift.io/v1
+kind: StorageCluster
+metadata:
+  name: ocs-storagecluster
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  arbiter: {}
+  encryption:
+    keyRotation:
+      schedule: '@weekly'
+    kms: {}
+  externalStorage: {}
+  {{- with .Values.monDataDirHostPath }}
+  monDataDirHostPath: {{ quote . }}
+  {{- end }}
+  managedResources:
+    cephBlockPools: {}
+    cephConfig: {}
+    cephDashboard: {}
+    cephFilesystems: {}
+    cephObjectStoreUsers: {}
+    cephObjectStores: {}
+  resourceProfile: {{ .Values.resourceProfile }}
+  {{- with .Values.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  mirroring: {}
+  nodeTopologies: {}
+  {{- with .Values.storageDeviceSets }}
+  storageDeviceSets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.multiCloudGateway }}
+  multiCloudGateway:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
