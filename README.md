@@ -19,7 +19,7 @@ Loki requires a lot of resources for some reason. You will need to add several (
 
 You will also need OpenShift AI enabled. The dashboard specifically looks for vLLM running in KServe, so that is taken as a given.
 
-Run `setup.sh` to stand up all the necessary infrastructure. Then log into Grafana with your OpenShift user and upload the grafana json files (TODO) as dashboards.
+Run `setup.sh` to stand up all the necessary infrastructure. Then log into Grafana with your OpenShift user and upload the [grafana json file](dashboard/vllm-logging-dashboard.json) as dashboards.
 
 ## References
 

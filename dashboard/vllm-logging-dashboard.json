@@ -1,0 +1,410 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "sum by (username) (\r\n  count_over_time(\r\n    { log_type=\"application\", k8s_container_name=\"authorino\" }\r\n      | json\r\n      | line_format \"{{.message}}\"\r\n      | json\r\n      | msg = \"evaluating for input\"\r\n      | label_format username = input_auth_identity_user_username, request_id = input_context_request_http_id, model_name = input_context_request_http_headers_kserve_isvc_name\r\n      | username != \"\" and request_id != \"\" and model_name=\"$model_name\"\r\n    [$interval]\r\n  )\r\n)",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Requests over time",
+      "transformations": [],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{log_type=\"application\", k8s_container_name=\"authorino\" }\r\n      | json\r\n      | line_format \"{{.message}}\"\r\n      | json\r\n      | msg = \"evaluating for input\"\r\n      | label_format username = input_auth_identity_user_username, request_id = input_context_request_http_id, model_name = input_context_request_http_headers_kserve_isvc_name\r\n      | username != \"\" and request_id != \"\" and model_name=\"$model_name\"",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"prompt\" | label_format model_name=\"{{.kubernetes_annotations_openshift_io_display_name}}\" | model_name=\"$model_name\" | regexp \"chatcmpl-(?<request>.*?):\" | regexp \"prompt: '(?<prompt>.*?)', \"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "B"
+        }
+      ],
+      "title": "Source panel",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "request",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Line": true,
+              "_timestamp": true,
+              "hostname": true,
+              "id": true,
+              "k8s_container_name": true,
+              "k8s_namespace_name": true,
+              "k8s_node_name": true,
+              "k8s_pod_name": true,
+              "kubernetes_annotations_autoscaling_knative_dev_class": true,
+              "kubernetes_annotations_autoscaling_knative_dev_max_scale": true,
+              "kubernetes_annotations_autoscaling_knative_dev_min_scale": true,
+              "kubernetes_annotations_internal_serving_kserve_io_storage_initializer_sourceuri": true,
+              "kubernetes_annotations_istio_io_rev": true,
+              "kubernetes_annotations_k8s_ovn_org_pod_networks": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_networks": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_container": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container": true,
+              "kubernetes_annotations_openshift_io_display_name": true,
+              "kubernetes_annotations_openshift_io_scc": true,
+              "kubernetes_annotations_prometheus_io_path": true,
+              "kubernetes_annotations_prometheus_io_port": true,
+              "kubernetes_annotations_prometheus_io_scrape": true,
+              "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod": true,
+              "kubernetes_annotations_serving_knative_dev_creator": true,
+              "kubernetes_annotations_serving_kserve_io_deploymentMode": true,
+              "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation": true,
+              "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping": true,
+              "kubernetes_annotations_sidecar_istio_io_inject": true,
+              "kubernetes_annotations_sidecar_istio_io_interceptionMode": true,
+              "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers": true,
+              "kubernetes_annotations_sidecar_istio_io_status": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges": true,
+              "kubernetes_container_id": true,
+              "kubernetes_container_image": true,
+              "kubernetes_container_image_id": true,
+              "kubernetes_container_iostream": true,
+              "kubernetes_container_name": true,
+              "kubernetes_container_name_extracted": true,
+              "kubernetes_host": true,
+              "kubernetes_labels_app": true,
+              "kubernetes_labels_component": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_region": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_zone": true,
+              "kubernetes_labels_maistra_version": true,
+              "kubernetes_labels_opendatahub_io_dashboard": true,
+              "kubernetes_labels_pod_template_hash": true,
+              "kubernetes_labels_security_istio_io_tlsMode": true,
+              "kubernetes_labels_service_istio_io_canonical_name": true,
+              "kubernetes_labels_service_istio_io_canonical_revision": true,
+              "kubernetes_labels_serving_knative_dev_configuration": true,
+              "kubernetes_labels_serving_knative_dev_configurationGeneration": true,
+              "kubernetes_labels_serving_knative_dev_configurationUID": true,
+              "kubernetes_labels_serving_knative_dev_revision": true,
+              "kubernetes_labels_serving_knative_dev_revisionUID": true,
+              "kubernetes_labels_serving_knative_dev_service": true,
+              "kubernetes_labels_serving_knative_dev_serviceUID": true,
+              "kubernetes_labels_serving_kserve_io_inferenceservice": true,
+              "kubernetes_labels_topology_istio_io_subzone": true,
+              "kubernetes_labels_topology_kubernetes_io_region": true,
+              "kubernetes_labels_topology_kubernetes_io_zone": true,
+              "kubernetes_namespace_id": true,
+              "kubernetes_namespace_labels_kubernetes_io_metadata_name": true,
+              "kubernetes_namespace_labels_maistra_io_member_of": true,
+              "kubernetes_namespace_labels_modelmesh_enabled": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version": true,
+              "kubernetes_namespace_name": true,
+              "kubernetes_namespace_name_extracted": true,
+              "kubernetes_pod_id": true,
+              "kubernetes_pod_ip": true,
+              "kubernetes_pod_name": true,
+              "kubernetes_pod_name_extracted": true,
+              "kubernetes_pod_owner": true,
+              "labels": true,
+              "level": true,
+              "log_source": true,
+              "log_type": true,
+              "log_type_extracted": true,
+              "message": true,
+              "openshift_cluster_id": true,
+              "openshift_log_type": true,
+              "openshift_sequence": true,
+              "request": false,
+              "tsNs": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "granite",
+          "value": "granite"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+        },
+        "definition": "Source panel",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Model",
+        "multi": true,
+        "name": "model_name",
+        "options": [],
+        "query": {
+          "label": "kubernetes_pod_name",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" }",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "(?<model_name>.*?)-predictor.*",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "auto": false,
+        "auto_count": 30,
+        "auto_min": "10s",
+        "current": {
+          "selected": false,
+          "text": "5m",
+          "value": "5m"
+        },
+        "hide": 0,
+        "label": "Interval",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "30s",
+            "value": "30s"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": true,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          }
+        ],
+        "query": "30s,1m,5m,10m,30m,1h",
+        "queryValue": "",
+        "refresh": 2,
+        "skipUrlSync": false,
+        "type": "interval"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "vLLM Logging",
+  "uid": "ec0f6343-64a8-4758-a3e2-c40868765302",
+  "version": 1,
+  "weekStart": ""
+}
