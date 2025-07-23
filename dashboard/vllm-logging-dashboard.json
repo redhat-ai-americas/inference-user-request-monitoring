@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -27,99 +27,7 @@
         "type": "loki",
         "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "9.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
-          },
-          "editorMode": "code",
-          "expr": "sum by (username) (\r\n  count_over_time(\r\n    { log_type=\"application\", k8s_container_name=\"authorino\" }\r\n      | json\r\n      | line_format \"{{.message}}\"\r\n      | json\r\n      | msg = \"evaluating for input\"\r\n      | label_format username = input_auth_identity_user_username, request_id = input_context_request_http_id, model_name = input_context_request_http_headers_kserve_isvc_name\r\n      | username != \"\" and request_id != \"\" and model_name=\"$model_name\"\r\n    [$interval]\r\n  )\r\n)",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Requests over time",
-      "transformations": [],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
-      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -153,9 +61,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 0
       },
-      "id": 1,
+      "id": 3,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -187,13 +95,24 @@
             "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
           },
           "editorMode": "code",
-          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"prompt\" | label_format model_name=\"{{.kubernetes_annotations_openshift_io_display_name}}\" | model_name=\"$model_name\" | regexp \"chatcmpl-(?<request>.*?):\" | regexp \"prompt: '(?<prompt>.*?)', \"",
+          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"prompt\" | label_format model_name=\"{{.kubernetes_annotations_openshift_io_display_name}}\" | model_name=\"$model_name\" | regexp \"chatcmpl-(?<request>.*?):\" | regexp \"prompt: \\\"(?<prompt>.*?)\\\", \"",
           "hide": false,
           "queryType": "range",
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"Prompt.*Total\" | regexp \"chatcmpl-(?<request>.*?),\" | regexp \"Prompt: (?<prompt>.*?), \" | regexp \"Completion: (?<completion>.*?), \" | regexp \"Total: (?<total>.*?)$\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "C"
         }
       ],
-      "title": "Source panel",
+      "title": "Tokens By User",
       "transformations": [
         {
           "id": "extractFields",
@@ -214,13 +133,19 @@
             "excludeByName": {
               "Line 1": true,
               "Line 2": true,
+              "Line 3": true,
               "Time 2": true,
+              "Time 3": true,
+              "__time_shard__": true,
               "_timestamp 1": true,
               "_timestamp 2": true,
+              "_timestamp 3": true,
               "hostname 1": true,
               "hostname 2": true,
+              "hostname 3": true,
               "id 1": true,
               "id 2": true,
+              "id 3": true,
               "input_auth_identity_authenticated": true,
               "input_auth_identity_user_uid": true,
               "input_context_destination_address_Address_SocketAddress_PortSpecifier_PortValue": true,
@@ -311,167 +236,895 @@
               "input_source_principal": true,
               "k8s_container_name 1": true,
               "k8s_container_name 2": true,
+              "k8s_container_name 3": true,
               "k8s_namespace_name 1": true,
               "k8s_namespace_name 2": true,
+              "k8s_namespace_name 3": true,
               "k8s_node_name 1": true,
               "k8s_node_name 2": true,
+              "k8s_node_name 3": true,
               "k8s_pod_name 1": true,
               "k8s_pod_name 2": true,
+              "k8s_pod_name 3": true,
               "kubernetes_annotations_autoscaling_knative_dev_class": true,
+              "kubernetes_annotations_autoscaling_knative_dev_class 2": true,
               "kubernetes_annotations_autoscaling_knative_dev_max_scale": true,
+              "kubernetes_annotations_autoscaling_knative_dev_max_scale 2": true,
               "kubernetes_annotations_autoscaling_knative_dev_min_scale": true,
+              "kubernetes_annotations_autoscaling_knative_dev_min_scale 2": true,
               "kubernetes_annotations_internal_serving_kserve_io_storage_initializer_sourceuri": true,
+              "kubernetes_annotations_internal_serving_kserve_io_storage_initializer_sourceuri 2": true,
               "kubernetes_annotations_istio_io_rev 1": true,
               "kubernetes_annotations_istio_io_rev 2": true,
+              "kubernetes_annotations_istio_io_rev 3": true,
               "kubernetes_annotations_k8s_ovn_org_pod_networks 1": true,
               "kubernetes_annotations_k8s_ovn_org_pod_networks 2": true,
+              "kubernetes_annotations_k8s_ovn_org_pod_networks 3": true,
               "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 1": true,
               "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 2": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 3": true,
               "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 1": true,
               "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 2": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 3": true,
               "kubernetes_annotations_kubectl_kubernetes_io_default_container 1": true,
               "kubernetes_annotations_kubectl_kubernetes_io_default_container 2": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_container 3": true,
               "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 1": true,
               "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 2": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 3": true,
               "kubernetes_annotations_openshift_io_display_name": true,
+              "kubernetes_annotations_openshift_io_display_name 2": true,
               "kubernetes_annotations_openshift_io_scc 1": true,
               "kubernetes_annotations_openshift_io_scc 2": true,
+              "kubernetes_annotations_openshift_io_scc 3": true,
               "kubernetes_annotations_prometheus_io_path 1": true,
               "kubernetes_annotations_prometheus_io_path 2": true,
+              "kubernetes_annotations_prometheus_io_path 3": true,
               "kubernetes_annotations_prometheus_io_port 1": true,
               "kubernetes_annotations_prometheus_io_port 2": true,
+              "kubernetes_annotations_prometheus_io_port 3": true,
               "kubernetes_annotations_prometheus_io_scrape 1": true,
               "kubernetes_annotations_prometheus_io_scrape 2": true,
+              "kubernetes_annotations_prometheus_io_scrape 3": true,
               "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 1": true,
               "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 2": true,
+              "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 3": true,
+              "kubernetes_annotations_security_opendatahub_io_enable_auth": true,
+              "kubernetes_annotations_service_beta_openshift_io_serving_cert_secret_name": true,
               "kubernetes_annotations_serving_knative_dev_creator": true,
+              "kubernetes_annotations_serving_knative_dev_creator 2": true,
               "kubernetes_annotations_serving_kserve_io_deploymentMode": true,
+              "kubernetes_annotations_serving_kserve_io_deploymentMode 2": true,
               "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation": true,
+              "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation 2": true,
               "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping": true,
+              "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping 2": true,
               "kubernetes_annotations_sidecar_istio_io_inject": true,
+              "kubernetes_annotations_sidecar_istio_io_inject 2": true,
               "kubernetes_annotations_sidecar_istio_io_interceptionMode 1": true,
               "kubernetes_annotations_sidecar_istio_io_interceptionMode 2": true,
+              "kubernetes_annotations_sidecar_istio_io_interceptionMode 3": true,
               "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers": true,
+              "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers 2": true,
               "kubernetes_annotations_sidecar_istio_io_status 1": true,
               "kubernetes_annotations_sidecar_istio_io_status 2": true,
+              "kubernetes_annotations_sidecar_istio_io_status 3": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 1": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 3": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 1": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 3": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 1": true,
               "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 3": true,
               "kubernetes_container_id 1": true,
               "kubernetes_container_id 2": true,
+              "kubernetes_container_id 3": true,
               "kubernetes_container_image 1": true,
               "kubernetes_container_image 2": true,
+              "kubernetes_container_image 3": true,
               "kubernetes_container_image_id 1": true,
               "kubernetes_container_image_id 2": true,
+              "kubernetes_container_image_id 3": true,
               "kubernetes_container_iostream 1": true,
               "kubernetes_container_iostream 2": true,
+              "kubernetes_container_iostream 3": true,
               "kubernetes_container_name 1": true,
               "kubernetes_container_name 2": true,
+              "kubernetes_container_name 3": true,
               "kubernetes_container_name_extracted 1": true,
               "kubernetes_container_name_extracted 2": true,
+              "kubernetes_container_name_extracted 3": true,
               "kubernetes_host 1": true,
               "kubernetes_host 2": true,
+              "kubernetes_host 3": true,
               "kubernetes_labels_app": true,
+              "kubernetes_labels_app 2": true,
               "kubernetes_labels_authorino_resource": true,
               "kubernetes_labels_component": true,
+              "kubernetes_labels_component 2": true,
               "kubernetes_labels_control_plane": true,
               "kubernetes_labels_failure_domain_beta_kubernetes_io_region 1": true,
               "kubernetes_labels_failure_domain_beta_kubernetes_io_region 2": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_region 3": true,
               "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 1": true,
               "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 2": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 3": true,
               "kubernetes_labels_maistra_version 1": true,
               "kubernetes_labels_maistra_version 2": true,
+              "kubernetes_labels_maistra_version 3": true,
+              "kubernetes_labels_networking_kserve_io_visibility": true,
               "kubernetes_labels_opendatahub_io_dashboard": true,
+              "kubernetes_labels_opendatahub_io_dashboard 2": true,
               "kubernetes_labels_pod_template_hash 1": true,
               "kubernetes_labels_pod_template_hash 2": true,
+              "kubernetes_labels_pod_template_hash 3": true,
               "kubernetes_labels_security_istio_io_tlsMode 1": true,
               "kubernetes_labels_security_istio_io_tlsMode 2": true,
+              "kubernetes_labels_security_istio_io_tlsMode 3": true,
               "kubernetes_labels_service_istio_io_canonical_name 1": true,
               "kubernetes_labels_service_istio_io_canonical_name 2": true,
+              "kubernetes_labels_service_istio_io_canonical_name 3": true,
               "kubernetes_labels_service_istio_io_canonical_revision 1": true,
               "kubernetes_labels_service_istio_io_canonical_revision 2": true,
+              "kubernetes_labels_service_istio_io_canonical_revision 3": true,
               "kubernetes_labels_serving_knative_dev_configuration": true,
+              "kubernetes_labels_serving_knative_dev_configuration 2": true,
               "kubernetes_labels_serving_knative_dev_configurationGeneration": true,
+              "kubernetes_labels_serving_knative_dev_configurationGeneration 2": true,
               "kubernetes_labels_serving_knative_dev_configurationUID": true,
+              "kubernetes_labels_serving_knative_dev_configurationUID 2": true,
               "kubernetes_labels_serving_knative_dev_revision": true,
+              "kubernetes_labels_serving_knative_dev_revision 2": true,
               "kubernetes_labels_serving_knative_dev_revisionUID": true,
+              "kubernetes_labels_serving_knative_dev_revisionUID 2": true,
               "kubernetes_labels_serving_knative_dev_service": true,
+              "kubernetes_labels_serving_knative_dev_service 2": true,
               "kubernetes_labels_serving_knative_dev_serviceUID": true,
+              "kubernetes_labels_serving_knative_dev_serviceUID 2": true,
               "kubernetes_labels_serving_kserve_io_inferenceservice": true,
+              "kubernetes_labels_serving_kserve_io_inferenceservice 2": true,
               "kubernetes_labels_sidecar_istio_io_inject": true,
               "kubernetes_labels_topology_istio_io_subzone 1": true,
               "kubernetes_labels_topology_istio_io_subzone 2": true,
+              "kubernetes_labels_topology_istio_io_subzone 3": true,
               "kubernetes_labels_topology_kubernetes_io_region 1": true,
               "kubernetes_labels_topology_kubernetes_io_region 2": true,
+              "kubernetes_labels_topology_kubernetes_io_region 3": true,
               "kubernetes_labels_topology_kubernetes_io_zone 1": true,
               "kubernetes_labels_topology_kubernetes_io_zone 2": true,
+              "kubernetes_labels_topology_kubernetes_io_zone 3": true,
               "kubernetes_namespace_id 1": true,
               "kubernetes_namespace_id 2": true,
+              "kubernetes_namespace_id 3": true,
               "kubernetes_namespace_labels_kubernetes_io_metadata_name 1": true,
               "kubernetes_namespace_labels_kubernetes_io_metadata_name 2": true,
+              "kubernetes_namespace_labels_kubernetes_io_metadata_name 3": true,
               "kubernetes_namespace_labels_maistra_io_member_of 1": true,
               "kubernetes_namespace_labels_maistra_io_member_of 2": true,
+              "kubernetes_namespace_labels_maistra_io_member_of 3": true,
               "kubernetes_namespace_labels_modelmesh_enabled": true,
+              "kubernetes_namespace_labels_modelmesh_enabled 2": true,
               "kubernetes_namespace_labels_opendatahub_io_generated_namespace": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 1": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 3": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 1": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 3": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 1": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 3": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 1": true,
               "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 3": true,
               "kubernetes_namespace_name 1": true,
               "kubernetes_namespace_name 2": true,
+              "kubernetes_namespace_name 3": true,
               "kubernetes_namespace_name_extracted 1": true,
               "kubernetes_namespace_name_extracted 2": true,
+              "kubernetes_namespace_name_extracted 3": true,
               "kubernetes_pod_id 1": true,
               "kubernetes_pod_id 2": true,
+              "kubernetes_pod_id 3": true,
               "kubernetes_pod_ip 1": true,
               "kubernetes_pod_ip 2": true,
+              "kubernetes_pod_ip 3": true,
               "kubernetes_pod_name 1": true,
               "kubernetes_pod_name 2": true,
+              "kubernetes_pod_name 3": true,
               "kubernetes_pod_name_extracted 1": true,
               "kubernetes_pod_name_extracted 2": true,
+              "kubernetes_pod_name_extracted 3": true,
               "kubernetes_pod_owner 1": true,
               "kubernetes_pod_owner 2": true,
+              "kubernetes_pod_owner 3": true,
               "labels 1": true,
               "labels 2": true,
+              "labels 3": true,
               "level 1": true,
               "level 2": true,
+              "level 3": true,
               "log_source 1": true,
               "log_source 2": true,
+              "log_source 3": true,
               "log_type 1": true,
               "log_type 2": true,
+              "log_type 3": true,
               "log_type_extracted 1": true,
               "log_type_extracted 2": true,
+              "log_type_extracted 3": true,
               "logger": true,
               "message 1": true,
               "message 2": true,
+              "message 3": true,
               "model_name 1": true,
               "model_name 2": false,
               "msg": true,
               "openshift_cluster_id 1": true,
               "openshift_cluster_id 2": true,
+              "openshift_cluster_id 3": true,
               "openshift_log_type 1": true,
               "openshift_log_type 2": true,
+              "openshift_log_type 3": true,
               "openshift_sequence 1": true,
               "openshift_sequence 2": true,
+              "openshift_sequence 3": true,
+              "prompt 1": true,
+              "prompt 2": false,
               "request_id": true,
               "ts": true,
               "tsNs 1": true,
-              "tsNs 2": true
+              "tsNs 2": true,
+              "tsNs 3": true
             },
             "indexByName": {},
             "renameByName": {
               "Time 1": "Time",
+              "completion": "Completion Tokens",
               "labels 1": "",
               "model_name 2": "Model Name",
               "prompt": "Prompt",
+              "prompt 2": "Prompt Tokens",
               "request": "Request",
+              "total": "Total Tokens",
+              "username": "Username"
+            }
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "isNull",
+                  "options": {}
+                },
+                "fieldName": "Model Name"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "number",
+                "targetField": "Completion Tokens"
+              },
+              {
+                "destinationType": "number",
+                "targetField": "Prompt Tokens"
+              },
+              {
+                "destinationType": "number",
+                "targetField": "Total Tokens"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Completion Tokens": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Model Name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Prompt Tokens": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Total Tokens": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Username": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "sum by (username) (\r\n  count_over_time(\r\n    { log_type=\"application\", k8s_container_name=\"authorino\" }\r\n      | json\r\n      | line_format \"{{.message}}\"\r\n      | json\r\n      | msg = \"evaluating for input\"\r\n      | label_format username = input_auth_identity_user_username, request_id = input_context_request_http_id, model_name = input_context_request_http_headers_kserve_isvc_name\r\n      | username != \"\" and request_id != \"\" and model_name=\"$model_name\"\r\n    [$interval]\r\n  )\r\n)",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Requests over time",
+      "transformations": [],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{log_type=\"application\", k8s_container_name=\"authorino\" }\r\n      | json\r\n      | line_format \"{{.message}}\"\r\n      | json\r\n      | msg = \"evaluating for input\"\r\n      | label_format username = input_auth_identity_user_username, request = input_context_request_http_id, model_name = input_context_request_http_headers_kserve_isvc_name\r\n      | username != \"\" and request != \"\" and model_name=\"$model_name\"",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"prompt\" | label_format model_name=\"{{.kubernetes_annotations_openshift_io_display_name}}\" | model_name=\"$model_name\" | regexp \"chatcmpl-(?<request>.*?):\" | regexp \"prompt: \\\"(?<prompt>.*?)\\\", \"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+          },
+          "editorMode": "code",
+          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"Prompt.*Total\" | regexp \"chatcmpl-(?<request>.*?),\" | regexp \"Prompt: (?<prompt>.*?), \" | regexp \"Completion: (?<completion>.*?), \" | regexp \"Total: (?<total>.*?)$\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "C"
+        }
+      ],
+      "title": "Individual Requests",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "request",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Line 1": true,
+              "Line 2": true,
+              "Line 3": true,
+              "Time 2": true,
+              "Time 3": true,
+              "__time_shard__": true,
+              "_timestamp 1": true,
+              "_timestamp 2": true,
+              "_timestamp 3": true,
+              "hostname 1": true,
+              "hostname 2": true,
+              "hostname 3": true,
+              "id 1": true,
+              "id 2": true,
+              "id 3": true,
+              "input_auth_identity_authenticated": true,
+              "input_auth_identity_user_uid": true,
+              "input_context_destination_address_Address_SocketAddress_PortSpecifier_PortValue": true,
+              "input_context_destination_address_Address_SocketAddress_address": true,
+              "input_context_destination_principal": true,
+              "input_context_request_http_headers__authority": true,
+              "input_context_request_http_headers__method": true,
+              "input_context_request_http_headers__path": true,
+              "input_context_request_http_headers__scheme": true,
+              "input_context_request_http_headers_accept": true,
+              "input_context_request_http_headers_accept_encoding": true,
+              "input_context_request_http_headers_authorization": true,
+              "input_context_request_http_headers_content_length": true,
+              "input_context_request_http_headers_content_type": true,
+              "input_context_request_http_headers_k_original_host": true,
+              "input_context_request_http_headers_k_proxy_request": true,
+              "input_context_request_http_headers_kserve_isvc_namespace": true,
+              "input_context_request_http_headers_user_agent": true,
+              "input_context_request_http_headers_x_envoy_attempt_count": true,
+              "input_context_request_http_headers_x_envoy_external_address": true,
+              "input_context_request_http_headers_x_forwarded_client_cert": true,
+              "input_context_request_http_headers_x_forwarded_for": true,
+              "input_context_request_http_headers_x_forwarded_proto": true,
+              "input_context_request_http_headers_x_request_id": true,
+              "input_context_request_http_headers_x_stainless_arch": true,
+              "input_context_request_http_headers_x_stainless_async": true,
+              "input_context_request_http_headers_x_stainless_lang": true,
+              "input_context_request_http_headers_x_stainless_os": true,
+              "input_context_request_http_headers_x_stainless_package_version": true,
+              "input_context_request_http_headers_x_stainless_read_timeout": true,
+              "input_context_request_http_headers_x_stainless_retry_count": true,
+              "input_context_request_http_headers_x_stainless_runtime": true,
+              "input_context_request_http_headers_x_stainless_runtime_version": true,
+              "input_context_request_http_host": true,
+              "input_context_request_http_method": true,
+              "input_context_request_http_path": true,
+              "input_context_request_http_protocol": true,
+              "input_context_request_http_scheme": true,
+              "input_context_request_time_nanos": true,
+              "input_context_request_time_seconds": true,
+              "input_context_source_address_Address_SocketAddress_PortSpecifier_PortValue": true,
+              "input_context_source_address_Address_SocketAddress_address": true,
+              "input_context_source_principal": true,
+              "input_destination_address": true,
+              "input_destination_port": true,
+              "input_destination_principal": true,
+              "input_request_headers__authority": true,
+              "input_request_headers__method": true,
+              "input_request_headers__path": true,
+              "input_request_headers__scheme": true,
+              "input_request_headers_accept": true,
+              "input_request_headers_accept_encoding": true,
+              "input_request_headers_authorization": true,
+              "input_request_headers_content_length": true,
+              "input_request_headers_content_type": true,
+              "input_request_headers_k_original_host": true,
+              "input_request_headers_k_proxy_request": true,
+              "input_request_headers_kserve_isvc_name": true,
+              "input_request_headers_kserve_isvc_namespace": true,
+              "input_request_headers_user_agent": true,
+              "input_request_headers_x_envoy_attempt_count": true,
+              "input_request_headers_x_envoy_external_address": true,
+              "input_request_headers_x_forwarded_client_cert": true,
+              "input_request_headers_x_forwarded_for": true,
+              "input_request_headers_x_forwarded_proto": true,
+              "input_request_headers_x_request_id": true,
+              "input_request_headers_x_stainless_arch": true,
+              "input_request_headers_x_stainless_async": true,
+              "input_request_headers_x_stainless_lang": true,
+              "input_request_headers_x_stainless_os": true,
+              "input_request_headers_x_stainless_package_version": true,
+              "input_request_headers_x_stainless_read_timeout": true,
+              "input_request_headers_x_stainless_retry_count": true,
+              "input_request_headers_x_stainless_runtime": true,
+              "input_request_headers_x_stainless_runtime_version": true,
+              "input_request_host": true,
+              "input_request_id": true,
+              "input_request_method": true,
+              "input_request_path": true,
+              "input_request_protocol": true,
+              "input_request_scheme": true,
+              "input_request_time_nanos": true,
+              "input_request_time_seconds": true,
+              "input_request_url_path": true,
+              "input_request_user_agent": true,
+              "input_source_address": true,
+              "input_source_port": true,
+              "input_source_principal": true,
+              "k8s_container_name 1": true,
+              "k8s_container_name 2": true,
+              "k8s_container_name 3": true,
+              "k8s_namespace_name 1": true,
+              "k8s_namespace_name 2": true,
+              "k8s_namespace_name 3": true,
+              "k8s_node_name 1": true,
+              "k8s_node_name 2": true,
+              "k8s_node_name 3": true,
+              "k8s_pod_name 1": true,
+              "k8s_pod_name 2": true,
+              "k8s_pod_name 3": true,
+              "kubernetes_annotations_autoscaling_knative_dev_class": true,
+              "kubernetes_annotations_autoscaling_knative_dev_class 2": true,
+              "kubernetes_annotations_autoscaling_knative_dev_max_scale": true,
+              "kubernetes_annotations_autoscaling_knative_dev_max_scale 2": true,
+              "kubernetes_annotations_autoscaling_knative_dev_min_scale": true,
+              "kubernetes_annotations_autoscaling_knative_dev_min_scale 2": true,
+              "kubernetes_annotations_internal_serving_kserve_io_storage_initializer_sourceuri": true,
+              "kubernetes_annotations_internal_serving_kserve_io_storage_initializer_sourceuri 2": true,
+              "kubernetes_annotations_istio_io_rev 1": true,
+              "kubernetes_annotations_istio_io_rev 2": true,
+              "kubernetes_annotations_istio_io_rev 3": true,
+              "kubernetes_annotations_k8s_ovn_org_pod_networks 1": true,
+              "kubernetes_annotations_k8s_ovn_org_pod_networks 2": true,
+              "kubernetes_annotations_k8s_ovn_org_pod_networks 3": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 1": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 2": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_network_status 3": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 1": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 2": true,
+              "kubernetes_annotations_k8s_v1_cni_cncf_io_networks 3": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_container 1": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_container 2": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_container 3": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 1": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 2": true,
+              "kubernetes_annotations_kubectl_kubernetes_io_default_logs_container 3": true,
+              "kubernetes_annotations_openshift_io_display_name": true,
+              "kubernetes_annotations_openshift_io_display_name 2": true,
+              "kubernetes_annotations_openshift_io_scc 1": true,
+              "kubernetes_annotations_openshift_io_scc 2": true,
+              "kubernetes_annotations_openshift_io_scc 3": true,
+              "kubernetes_annotations_prometheus_io_path 1": true,
+              "kubernetes_annotations_prometheus_io_path 2": true,
+              "kubernetes_annotations_prometheus_io_path 3": true,
+              "kubernetes_annotations_prometheus_io_port 1": true,
+              "kubernetes_annotations_prometheus_io_port 2": true,
+              "kubernetes_annotations_prometheus_io_port 3": true,
+              "kubernetes_annotations_prometheus_io_scrape 1": true,
+              "kubernetes_annotations_prometheus_io_scrape 2": true,
+              "kubernetes_annotations_prometheus_io_scrape 3": true,
+              "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 1": true,
+              "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 2": true,
+              "kubernetes_annotations_seccomp_security_alpha_kubernetes_io_pod 3": true,
+              "kubernetes_annotations_security_opendatahub_io_enable_auth": true,
+              "kubernetes_annotations_service_beta_openshift_io_serving_cert_secret_name": true,
+              "kubernetes_annotations_serving_knative_dev_creator": true,
+              "kubernetes_annotations_serving_knative_dev_creator 2": true,
+              "kubernetes_annotations_serving_kserve_io_deploymentMode": true,
+              "kubernetes_annotations_serving_kserve_io_deploymentMode 2": true,
+              "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation": true,
+              "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation 2": true,
+              "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping": true,
+              "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping 2": true,
+              "kubernetes_annotations_sidecar_istio_io_inject": true,
+              "kubernetes_annotations_sidecar_istio_io_inject 2": true,
+              "kubernetes_annotations_sidecar_istio_io_interceptionMode 1": true,
+              "kubernetes_annotations_sidecar_istio_io_interceptionMode 2": true,
+              "kubernetes_annotations_sidecar_istio_io_interceptionMode 3": true,
+              "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers": true,
+              "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers 2": true,
+              "kubernetes_annotations_sidecar_istio_io_status 1": true,
+              "kubernetes_annotations_sidecar_istio_io_status 2": true,
+              "kubernetes_annotations_sidecar_istio_io_status 3": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 1": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_excludeInboundPorts 3": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 1": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeInboundPorts 3": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 1": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 2": true,
+              "kubernetes_annotations_traffic_sidecar_istio_io_includeOutboundIPRanges 3": true,
+              "kubernetes_container_id 1": true,
+              "kubernetes_container_id 2": true,
+              "kubernetes_container_id 3": true,
+              "kubernetes_container_image 1": true,
+              "kubernetes_container_image 2": true,
+              "kubernetes_container_image 3": true,
+              "kubernetes_container_image_id 1": true,
+              "kubernetes_container_image_id 2": true,
+              "kubernetes_container_image_id 3": true,
+              "kubernetes_container_iostream 1": true,
+              "kubernetes_container_iostream 2": true,
+              "kubernetes_container_iostream 3": true,
+              "kubernetes_container_name 1": true,
+              "kubernetes_container_name 2": true,
+              "kubernetes_container_name 3": true,
+              "kubernetes_container_name_extracted 1": true,
+              "kubernetes_container_name_extracted 2": true,
+              "kubernetes_container_name_extracted 3": true,
+              "kubernetes_host 1": true,
+              "kubernetes_host 2": true,
+              "kubernetes_host 3": true,
+              "kubernetes_labels_app": true,
+              "kubernetes_labels_app 2": true,
+              "kubernetes_labels_authorino_resource": true,
+              "kubernetes_labels_component": true,
+              "kubernetes_labels_component 2": true,
+              "kubernetes_labels_control_plane": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_region 1": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_region 2": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_region 3": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 1": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 2": true,
+              "kubernetes_labels_failure_domain_beta_kubernetes_io_zone 3": true,
+              "kubernetes_labels_maistra_version 1": true,
+              "kubernetes_labels_maistra_version 2": true,
+              "kubernetes_labels_maistra_version 3": true,
+              "kubernetes_labels_networking_kserve_io_visibility": true,
+              "kubernetes_labels_opendatahub_io_dashboard": true,
+              "kubernetes_labels_opendatahub_io_dashboard 2": true,
+              "kubernetes_labels_pod_template_hash 1": true,
+              "kubernetes_labels_pod_template_hash 2": true,
+              "kubernetes_labels_pod_template_hash 3": true,
+              "kubernetes_labels_security_istio_io_tlsMode 1": true,
+              "kubernetes_labels_security_istio_io_tlsMode 2": true,
+              "kubernetes_labels_security_istio_io_tlsMode 3": true,
+              "kubernetes_labels_service_istio_io_canonical_name 1": true,
+              "kubernetes_labels_service_istio_io_canonical_name 2": true,
+              "kubernetes_labels_service_istio_io_canonical_name 3": true,
+              "kubernetes_labels_service_istio_io_canonical_revision 1": true,
+              "kubernetes_labels_service_istio_io_canonical_revision 2": true,
+              "kubernetes_labels_service_istio_io_canonical_revision 3": true,
+              "kubernetes_labels_serving_knative_dev_configuration": true,
+              "kubernetes_labels_serving_knative_dev_configuration 2": true,
+              "kubernetes_labels_serving_knative_dev_configurationGeneration": true,
+              "kubernetes_labels_serving_knative_dev_configurationGeneration 2": true,
+              "kubernetes_labels_serving_knative_dev_configurationUID": true,
+              "kubernetes_labels_serving_knative_dev_configurationUID 2": true,
+              "kubernetes_labels_serving_knative_dev_revision": true,
+              "kubernetes_labels_serving_knative_dev_revision 2": true,
+              "kubernetes_labels_serving_knative_dev_revisionUID": true,
+              "kubernetes_labels_serving_knative_dev_revisionUID 2": true,
+              "kubernetes_labels_serving_knative_dev_service": true,
+              "kubernetes_labels_serving_knative_dev_service 2": true,
+              "kubernetes_labels_serving_knative_dev_serviceUID": true,
+              "kubernetes_labels_serving_knative_dev_serviceUID 2": true,
+              "kubernetes_labels_serving_kserve_io_inferenceservice": true,
+              "kubernetes_labels_serving_kserve_io_inferenceservice 2": true,
+              "kubernetes_labels_sidecar_istio_io_inject": true,
+              "kubernetes_labels_topology_istio_io_subzone 1": true,
+              "kubernetes_labels_topology_istio_io_subzone 2": true,
+              "kubernetes_labels_topology_istio_io_subzone 3": true,
+              "kubernetes_labels_topology_kubernetes_io_region 1": true,
+              "kubernetes_labels_topology_kubernetes_io_region 2": true,
+              "kubernetes_labels_topology_kubernetes_io_region 3": true,
+              "kubernetes_labels_topology_kubernetes_io_zone 1": true,
+              "kubernetes_labels_topology_kubernetes_io_zone 2": true,
+              "kubernetes_labels_topology_kubernetes_io_zone 3": true,
+              "kubernetes_namespace_id 1": true,
+              "kubernetes_namespace_id 2": true,
+              "kubernetes_namespace_id 3": true,
+              "kubernetes_namespace_labels_kubernetes_io_metadata_name 1": true,
+              "kubernetes_namespace_labels_kubernetes_io_metadata_name 2": true,
+              "kubernetes_namespace_labels_kubernetes_io_metadata_name 3": true,
+              "kubernetes_namespace_labels_maistra_io_member_of 1": true,
+              "kubernetes_namespace_labels_maistra_io_member_of 2": true,
+              "kubernetes_namespace_labels_maistra_io_member_of 3": true,
+              "kubernetes_namespace_labels_modelmesh_enabled": true,
+              "kubernetes_namespace_labels_modelmesh_enabled 2": true,
+              "kubernetes_namespace_labels_opendatahub_io_generated_namespace": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 1": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit 3": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 1": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_audit_version 3": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 1": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn 3": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 1": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 2": true,
+              "kubernetes_namespace_labels_pod_security_kubernetes_io_warn_version 3": true,
+              "kubernetes_namespace_name 1": true,
+              "kubernetes_namespace_name 2": true,
+              "kubernetes_namespace_name 3": true,
+              "kubernetes_namespace_name_extracted 1": true,
+              "kubernetes_namespace_name_extracted 2": true,
+              "kubernetes_namespace_name_extracted 3": true,
+              "kubernetes_pod_id 1": true,
+              "kubernetes_pod_id 2": true,
+              "kubernetes_pod_id 3": true,
+              "kubernetes_pod_ip 1": true,
+              "kubernetes_pod_ip 2": true,
+              "kubernetes_pod_ip 3": true,
+              "kubernetes_pod_name 1": true,
+              "kubernetes_pod_name 2": true,
+              "kubernetes_pod_name 3": true,
+              "kubernetes_pod_name_extracted 1": true,
+              "kubernetes_pod_name_extracted 2": true,
+              "kubernetes_pod_name_extracted 3": true,
+              "kubernetes_pod_owner 1": true,
+              "kubernetes_pod_owner 2": true,
+              "kubernetes_pod_owner 3": true,
+              "labels 1": true,
+              "labels 2": true,
+              "labels 3": true,
+              "level 1": true,
+              "level 2": true,
+              "level 3": true,
+              "log_source 1": true,
+              "log_source 2": true,
+              "log_source 3": true,
+              "log_type 1": true,
+              "log_type 2": true,
+              "log_type 3": true,
+              "log_type_extracted 1": true,
+              "log_type_extracted 2": true,
+              "log_type_extracted 3": true,
+              "logger": true,
+              "message 1": true,
+              "message 2": true,
+              "message 3": true,
+              "model_name 1": true,
+              "model_name 2": false,
+              "msg": true,
+              "openshift_cluster_id 1": true,
+              "openshift_cluster_id 2": true,
+              "openshift_cluster_id 3": true,
+              "openshift_log_type 1": true,
+              "openshift_log_type 2": true,
+              "openshift_log_type 3": true,
+              "openshift_sequence 1": true,
+              "openshift_sequence 2": true,
+              "openshift_sequence 3": true,
+              "prompt 1": false,
+              "prompt 2": false,
+              "request_id": true,
+              "ts": true,
+              "tsNs 1": true,
+              "tsNs 2": true,
+              "tsNs 3": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time 1": "Time",
+              "completion": "Completion Tokens",
+              "labels 1": "",
+              "model_name 2": "Model Name",
+              "prompt": "Prompt",
+              "prompt 1": "Prompt",
+              "prompt 2": "Prompt Tokens",
+              "request": "Request",
+              "total": "Total Tokens",
               "username": "Username"
             }
           }
@@ -488,7 +1141,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "granite",
           "value": "granite"
         },
@@ -500,7 +1153,7 @@
         "hide": 0,
         "includeAll": false,
         "label": "Model",
-        "multi": true,
+        "multi": false,
         "name": "model_name",
         "options": [],
         "query": {
@@ -520,7 +1173,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "5m",
           "value": "5m"
         },
