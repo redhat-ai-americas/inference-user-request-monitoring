@@ -105,7 +105,7 @@
             "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
           },
           "editorMode": "code",
-          "expr": "sum by (user, model) (\r\n  sum_over_time(\r\n    { log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl`\r\n      | json\r\n      | line_format \"{{.message}}\" |~ \"OpenAI Usage\"\r\n      | regexp \"chatcmpl-(?<request_id>.*?),\" | regexp \"Model: (?<model>.*?),\" | regexp \"User: (?<user>.*?),\" | regexp \"Prompt: (?<prompt>.*?),\" | regexp \"Completion: (?<completion>.*?),\" | regexp \"Total: (?<total>.*?),\"\r\n      | user != \"\" and request_id != \"\"\r\n      | unwrap total\r\n    [$interval]\r\n  )\r\n)",
+          "expr": "sum by (user) (\r\n  sum_over_time(\r\n    { log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl`\r\n      | json\r\n      | line_format \"{{.message}}\" |~ \"OpenAI Usage\"\r\n      | regexp \"chatcmpl-(?<request_id>.*?),\" | regexp \"Model: (?<model>.*?),\" | regexp \"User: (?<user>.*?),\" | regexp \"Prompt: (?<prompt>.*?),\" | regexp \"Completion: (?<completion>.*?),\" | regexp \"Total: (?<total>.*?),\"\r\n      | user != \"\" and request_id != \"\" and model=\"${model_name}\"\r\n      | unwrap total\r\n    [$interval]\r\n  )\r\n)",
           "queryType": "range",
           "refId": "A"
         }
@@ -196,7 +196,7 @@
             "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
           },
           "editorMode": "code",
-          "expr": "sum by (user) (\r\n  count_over_time(\r\n    { log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl`\r\n      | json\r\n      | line_format \"{{.message}}\" |~ \"OpenAI Usage\"\r\n      | regexp \"chatcmpl-(?<request_id>.*?),\" | regexp \"Model: (?<model>.*?),\" | regexp \"User: (?<user>.*?),\" | regexp \"Prompt: (?<prompt>.*?),\" | regexp \"Completion: (?<completion>.*?),\" | regexp \"Total: (?<total>.*?),\"\r\n      | user != \"\" and request_id != \"\"\r\n    [$interval]\r\n  )\r\n)",
+          "expr": "sum by (user) (\r\n  count_over_time(\r\n    { log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl`\r\n      | json\r\n      | line_format \"{{.message}}\" |~ \"OpenAI Usage\"\r\n      | regexp \"chatcmpl-(?<request_id>.*?),\" | regexp \"Model: (?<model>.*?),\" | regexp \"User: (?<user>.*?),\" | regexp \"Prompt: (?<prompt>.*?),\" | regexp \"Completion: (?<completion>.*?),\" | regexp \"Total: (?<total>.*?),\"\r\n      | user != \"\" and request_id != \"\" and model=\"${model_name}\"\r\n    [$interval]\r\n  )\r\n)",
           "queryType": "range",
           "refId": "A"
         }
@@ -212,7 +212,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -241,9 +241,14 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -253,27 +258,25 @@
         "x": 0,
         "y": 8
       },
-      "id": 1,
+      "id": 6,
       "options": {
         "barRadius": 0,
         "barWidth": 0.97,
-        "colorByField": "Model",
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "orientation": "auto",
-        "showValue": "auto",
+        "showValue": "never",
         "stacking": "normal",
         "tooltip": {
           "mode": "single",
           "sort": "none"
         },
-        "xField": "User",
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
@@ -516,14 +519,25 @@
               "Total Tokens": {
                 "aggregations": [
                   "sum"
-                ],
-                "operation": "aggregate"
+                ]
               },
               "User": {
                 "aggregations": [],
                 "operation": "groupby"
               }
             }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "Completion Tokens (sum)"
+              }
+            ]
           }
         }
       ],
@@ -561,7 +575,20 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "User"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 341
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -580,7 +607,8 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "9.5.2",
       "targets": [
@@ -894,8 +922,8 @@
             "type": "loki",
             "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
           },
-          "editorMode": "code",
-          "expr": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" } |= `chatcmpl` | json | line_format \"{{.message}}\" |~ \"OpenAI Usage\" | regexp \"chatcmpl-(?<request_id>.*?),\" | regexp \"Model: (?<model>.*?),\" | regexp \"User: (?<user>.*?),\" | regexp \"Prompt: (?<prompt>.*?),\" | regexp \"Completion: (?<completion>.*?),\" | regexp \"Total: (?<total>.*?),\" | regexp \"Request: (?<request>.*?),\\\\s+Response\" | regexp \"Response: (?<response>.*?)$\"",
+          "editorMode": "builder",
+          "expr": "{log_type=\"application\", k8s_container_name=~\"kserve-container\"} |= `chatcmpl` | json | line_format `{{.message}}` |~ `OpenAI Usage` | regexp `chatcmpl-(?<request_id>.*?),` | regexp `Model: (?<model>.*?),` | regexp `User: (?<user>.*?),` | regexp `Prompt: (?<prompt>.*?),` | regexp `Completion: (?<completion>.*?),` | regexp `Total: (?<total>.*?),` | regexp `Request: (?<request>.*?),\\s+Response` | regexp `Response: (?<response>.*?)$` | model = `${model_name}`",
           "queryType": "range",
           "refId": "A"
         }
@@ -1159,6 +1187,35 @@
         "refresh": 2,
         "skipUrlSync": false,
         "type": "interval"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "granite-3-3-8b",
+          "value": "granite-3-3-8b"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "4b4e7fa0-9846-4a8a-9ab3-f09b21e777c8"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Model",
+        "multi": false,
+        "name": "model_name",
+        "options": [],
+        "query": {
+          "label": "kubernetes_pod_name",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{ log_type=\"application\", k8s_container_name=~\"kserve-container\" }",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "(?<model_name>.*?)-predictor.*",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
@@ -1170,6 +1227,6 @@
   "timezone": "",
   "title": "vLLM Logging",
   "uid": "af7f325a-3c3f-4ea1-81ed-705da79fd429",
-  "version": 5,
+  "version": 13,
   "weekStart": ""
 }
