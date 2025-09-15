@@ -970,6 +970,7 @@
               "kubernetes_annotations_serving_kserve_io_deploymentMode": true,
               "kubernetes_annotations_serving_kserve_io_enable_metric_aggregation": true,
               "kubernetes_annotations_serving_kserve_io_enable_prometheus_scraping": true,
+              "kubernetes_annotations_serving_kserve_io_stop": true,
               "kubernetes_annotations_sidecar_istio_io_inject": true,
               "kubernetes_annotations_sidecar_istio_io_interceptionMode": true,
               "kubernetes_annotations_sidecar_istio_io_rewriteAppHTTPProbers": true,
